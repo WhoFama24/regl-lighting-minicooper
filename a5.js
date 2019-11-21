@@ -271,7 +271,7 @@ function init()
         },
         uniforms: {
             // control flags
-            lighting_mode: lighting_modes[$("input[name=lighting-mode]:checked").val()],
+            lighting_mode: () => {return lighting_modes[$("input[name=lighting-mode]:checked").val()]},
             use_normal_map: () => {return parameters.normal_map},
             use_local_lighting: () => {return parameters.local_lighting},
             use_attenuation: () => {return parameters.light_attenuation},
