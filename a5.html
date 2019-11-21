@@ -15,10 +15,31 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-2">
-                    <div class="container">
-                        <input class="form-check-input" type="checkbox" value="" id="light-attenuation-check">
-                        <label class="form-check-label" for="light-attenuation-check">Light Attenuation</label>
-                    </div>
+                    <form>
+                        <div class="form-group form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="light-attenuation-check">
+                            <label class="form-check-label" for="light-attenuation-check">Light Attenuation</label>
+                        </div>
+                        <fieldset class="border p-2">
+                            <legend class="w-auto">Light Type</legend>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="lighting-mode" id="light-directional" value="directional" checked>
+                                <label class="form-check-label" for="light-directional">Directional Light</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="lighting-mode" id="light-point" value="point">
+                                <label class="form-check-label" for="light-point">Point Light</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="lighting-mode" id="light-spot" value="spot">
+                                <label class="form-check-label" for="light-spot">Spot Light</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="lighting-mode" id="light-normals" value="normals">
+                                <label class="form-check-label" for="light-normals">Normal Map</label>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
                 <div class="col-md-10">
                     <canvas id="regl-canvas"></div>
