@@ -3,6 +3,7 @@ precision highp float;
 
 // Input
 // control flags
+uniform int lighting_mode;
 uniform bool use_local_lighting;
 uniform bool use_normal_map;
 uniform bool use_attenuation;
@@ -41,7 +42,17 @@ varying vec2 fragtexcoord;
 
 void main()
 {
-    if (use_local_lighting) {
+    // Normal Map
+    if (lighting_mode == 0)
+    {
+        gl_FragColor = vec4(normalize(fragnormal), 1.0);
+    }
+
+    // Local Lighting Models
+    else if (lighting_mode == 1 ||
+             lighting_mode == 2 ||
+             lighting_mode == 3)
+    {
         vec3 modelnormal = normalize(fragnormal);
         vec3 cameranormal = normalize(vec3(view_inv * vec4(0.0,0.0,0.0,1.0)-fragposition));
         vec3 lightnormal;
@@ -82,9 +93,5 @@ void main()
         }
 
         gl_FragColor = vec4(ambient + diffuse + specular, alpha);
-    }
-
-    if (use_normal_map) {
-        gl_FragColor = vec4(normalize(fragnormal), 1.0);
     }
 }

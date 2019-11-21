@@ -62,6 +62,13 @@ const parameters = {
     diffuse_texture: true,
 };
 
+lighting_modes = {
+    normals: 0,
+    directional: 1,
+    point: 2,
+    spot: 3,
+}
+
 // Object to manipulate the MINI model
 class MiniCooperModel {
     constructor() {
@@ -264,6 +271,7 @@ function init()
         },
         uniforms: {
             // control flags
+            lighting_mode: lighting_modes[$("input[name=lighting-mode]:checked").val()],
             use_normal_map: () => {return parameters.normal_map},
             use_local_lighting: () => {return parameters.local_lighting},
             use_attenuation: () => {return parameters.light_attenuation},
@@ -348,7 +356,7 @@ function init()
 
             // Use diffuse textures if provided and selected
             let use_texture = false;
-            if (materials[key].diffuse === "mini_body_diffuse.png" && parameters.diffuse_texture)
+            if (materials[key].diffuse === "mini_body_diffuse.png" && $('#diffuse-texture-check').is(':checked'))
             {
                 use_texture = true;
             }
