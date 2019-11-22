@@ -9,6 +9,7 @@ Math.degrees = function(radians) {
     return radians * 180 / Math.PI;
 }
 
+
 // geometry: An associative array with three keys:
 //      - vertexdata:   An Array of floating point vertex data. It is an
 //                      interleaved float array of 3 position coordinates,
@@ -116,26 +117,97 @@ class MiniCooperModel {
 }
 let mini_model = new MiniCooperModel();
 
-class LightColor {
-    constructor({r=255,g=255,b=255}) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-    }
-}
-class DirectionalLight {
-    constructor() {
-        this.position = vec4.create();
-        this.color = [1,1,1];
+
+class Light {
+    constructor()
+    {
+        this.__position = vec4.fromValues(1,1,1,1);
+        this.__diffuse = vec4.fromValues(1,1,1,1);
+        this.__specular = vec4.fromValues(1,1,1,1);
+        this.__attenuation_constant = 0;
+        this.__attenuation_linear = 0.5;
+        this.__attenuation_quadratic = 0;
+        this.__perform_attenuation = false;
+        this.__spotlight_angle = 50;
+        this.__spotlight_exponent = 0;
+        this.__spotlight_direction =  vec3.fromValues(0,0,0);
     }
 
-    getLightDirection() {
-        let out = vec4.create();
-        vec4.normalize(out, this.position);
-        vec4.negate(out, out);
-        return out;
+    get position() {
+        return this.__position;
+    }
+    get diffuse() {
+        return this.__diffuse;
+    }
+    get specular() {
+        return this.__specular;
+    }
+    get attenuation_constant() {
+        return this.__attenuation_constant;
+    }
+    get attenuation_linear() {
+        return this.__attenuation_linear;
+    }
+    get attenuation_quadratic() {
+        return this.__attenuation_quadratic;
+    }
+    get attenuate() {
+        return this.__perform_attenuation;
+    }
+    get spotlight_angle() {
+        return this.__spotlight_angle;
+    }
+    get spotlight_exponent() {
+        return this.__spotlight_exponent;
+    }
+    get spotlight_direction() {
+        return this.__spotlight_direction;
+    }
+
+    set position(t) {
+        this.__position = vec4.fromValues(...t);
+    }
+    set diffuse(t) {
+        this.__diffuse = vec4.fromValues(...t);
+    }
+    set specular(t) {
+        this.__specular = vec4.fromValues(...t);
+    }
+    set attenuation_constant(t) {
+        this.__attenuation_constant = t;
+    }
+    set attenuation_linear(t) {
+        this.__attenuation_linear = t;
+    }
+    set attenuation_quadratic(t) {
+        this.__attenuation_quadratic = t;
+    }
+    set attenuate(t) {
+        this.__perform_attenuation = t;
+    }
+    set spotlight_angle(t) {
+        this.__spotlight_angle = t;
+    }
+    set spotlight_exponent(t) {
+        this.__spotlight_exponent;
+    }
+    set spotlight_direction(t) {
+        this.__spotlight_direction = vec3.fromValues(...t);
+    }
+
+    attenuateOn() {
+        this.__perform_attenuation = true;
+    }
+
+    attenuateOff() {
+        this.__perform_attenuation = false;
+    }
+
+    attenuateToggle() {
+        this.__perform_attenuation = !this.__perform_attenuation;
     }
 }
+let light_source = new Light();
 
 // Set up four Fetch calls for the resources and process accordingly.
 // Each one calls the init() function; this function only completes when
@@ -224,7 +296,30 @@ function load()
         {
             parameters.diffuse_texture = !parameters.diffuse_texture;
         }
-       });
+    });
+
+    // Add listeners for controls events
+    document.getElementById("light-x-slider").addEventListener('input', (e) => {
+       document.getElementById("light-x-label").innerHTML = e.target.value;
+       let temp = light_source.position;
+       temp[0] = e.target.value;
+       light_source.position = temp;
+    });
+    document.getElementById("light-y-slider").addEventListener('input', (e) => {
+       document.getElementById("light-y-label").innerHTML = e.target.value;
+       let temp = light_source.position;
+       temp[1] = e.target.value;
+       light_source.position = temp;
+    });
+    document.getElementById("light-z-slider").addEventListener('input', (e) => {
+       document.getElementById("light-z-label").innerHTML = e.target.value;
+       let temp = light_source.position;
+       temp[2] = e.target.value;
+       light_source.position = temp;
+    });
+    document.getElementById("light-attenuation-check").addEventListener('change', (e) => {
+        light_source.attenuate = e.target.checked;
+    });
 }
 
 // The intialization function. Checks for all resources before continuing
@@ -272,9 +367,7 @@ function init()
         uniforms: {
             // control flags
             lighting_mode: () => {return lighting_modes[$("input[name=lighting-mode]:checked").val()]},
-            use_normal_map: () => {return parameters.normal_map},
-            use_local_lighting: () => {return parameters.local_lighting},
-            use_attenuation: () => {return parameters.light_attenuation},
+            use_attenuation: () => {return light_source.attenuate},
             use_diffuse_texture: regl.prop('use_texture'),
 
             // transformations
@@ -292,15 +385,15 @@ function init()
 
             // light properties
             scene_ambient: [0.2, 0.2, 0.2, 1.0],
-            light_position: [1.0, 1.0, 1.0, 1.0],
-            light_diffuse: [1.0, 1.0, 1.0, 1.0],
-            light_specular: [1.0, 1.0, 1.0, 1.0],
-            light_constantAttenuation: 0.0,
-            light_linearAttenuation: 1.0,
-            light_quadraticAttenuation: 0.0,
-            light_spotCutoffAngle: 180.0,
-            light_spotExponent: 0.0,
-            light_spotDirection: [0.0, 0.0, 0.0],
+            light_position: () => {return light_source.position},
+            light_diffuse: () => {return light_source.diffuse},
+            light_specular: () => {return light_source.specular},
+            light_constantAttenuation: () => {return light_source.attenuation_constant},
+            light_linearAttenuation: () => {return light_source.attenuation_linear},
+            light_quadraticAttenuation: () => {return light_source.attenuation_quadratic},
+            spotlight_angle: () => {return light_source.spotlight_angle},
+            spotlight_exponent: () => {return light_source.spotlight_exponent},
+            spotlight_direction: () => {return light_source.spotlight_direction},
         },
         primitive: "triangles",
         elements: regl.prop('elements')
