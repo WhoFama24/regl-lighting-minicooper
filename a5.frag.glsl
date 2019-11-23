@@ -30,9 +30,10 @@ uniform vec4 light_specular;
 uniform float light_constantAttenuation;
 uniform float light_linearAttenuation;
 uniform float light_quadraticAttenuation;
-uniform float spotlight_angle;
+uniform float spotlight_mainlobe_angle;
+uniform float spotlight_falloff_angle;
 uniform float spotlight_exponent;
-uniform vec3 spotlight_direction;
+uniform vec3 spotlight_target;
 
 varying vec4 fragposition;
 varying vec3 fragnormal;
@@ -76,12 +77,13 @@ void main()
 
             if (lighting_mode == 3)     // spotlight
             {
-                float theta = max(0.0, dot(spotlight_direction, 0.0-lightnormal));
-                if (theta < cos(radians(spotlight_angle)))
+                vec3 dir = normalize(spotlight_target - vec3(light_position));
+                float theta = max(0.0, dot(dir, -lightnormal));
+                if (theta < cos(spotlight_falloff_angle))
                 {
                     attenuation = 0.0;
                 }
-                else
+                else if (cos(spotlight_falloff_angle) < theta && theta < cos(spotlight_mainlobe_angle))
                 {
                     attenuation = attenuation * pow(theta, spotlight_exponent);
                 }

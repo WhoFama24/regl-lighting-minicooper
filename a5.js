@@ -68,7 +68,13 @@ lighting_modes = {
     directional: 1,
     point: 2,
     spot: 3,
-}
+};
+
+movable_lights = [
+    "directional",
+    "point",
+    "spot",
+];
 
 // Object to manipulate the MINI model
 class MiniCooperModel {
@@ -128,9 +134,10 @@ class Light {
         this.__attenuation_linear = 0.5;
         this.__attenuation_quadratic = 0;
         this.__perform_attenuation = false;
-        this.__spotlight_angle = 50;
-        this.__spotlight_exponent = 0;
-        this.__spotlight_direction =  vec3.fromValues(0,0,0);
+        this.__spotlight_mainlobe_angle = 1;
+        this.__spotlight_falloff_angle = 2.5;
+        this.__spotlight_exponent = 100;
+        this.__spotlight_target =  vec3.fromValues(0,0,0);
     }
 
     get position() {
@@ -154,14 +161,17 @@ class Light {
     get attenuate() {
         return this.__perform_attenuation;
     }
-    get spotlight_angle() {
-        return this.__spotlight_angle;
+    get spotlight_mainlobe_angle() {
+        return this.__spotlight_mainlobe_angle;
+    }
+    get spotlight_falloff_angle() {
+        return this.__spotlight_falloff_angle;
     }
     get spotlight_exponent() {
         return this.__spotlight_exponent;
     }
-    get spotlight_direction() {
-        return this.__spotlight_direction;
+    get spotlight_target() {
+        return this.__spotlight_target;
     }
 
     set position(t) {
@@ -185,14 +195,17 @@ class Light {
     set attenuate(t) {
         this.__perform_attenuation = t;
     }
-    set spotlight_angle(t) {
-        this.__spotlight_angle = t;
+    set spotlight_mainlobe_angle(t) {
+        this.__spotlight_mainlobe_angle = t;
+    }
+    set spotlight_falloff_angle(t) {
+        this.__spotlight_falloff_angle = t;
     }
     set spotlight_exponent(t) {
         this.__spotlight_exponent;
     }
-    set spotlight_direction(t) {
-        this.__spotlight_direction = vec3.fromValues(...t);
+    set spotlight_target(t) {
+        this.__spotlight_target = vec3.fromValues(...t);
     }
 
     attenuateOn() {
@@ -298,7 +311,37 @@ function load()
         }
     });
 
-    // Add listeners for controls events
+    // Initialize sliders and labels
+    document.getElementById("light-x-label").innerHTML = light_source.position[0];
+    document.getElementById("light-y-label").innerHTML = light_source.position[1];
+    document.getElementById("light-z-label").innerHTML = light_source.position[2];
+    document.getElementById("light-x-slider").value = light_source.position[0];
+    document.getElementById("light-y-slider").value = light_source.position[1];
+    document.getElementById("light-z-slider").value = light_source.position[2];
+
+    // Light Type Eventhandler
+    $("input[name=lighting-mode]").click(function() {
+        // Show light position controls if appropriate
+        if (movable_lights.includes($(this).val()))
+        {
+            document.getElementById("light-position-controls").classList.remove("d-none");
+        }
+        else
+        {
+            document.getElementById("light-position-controls").classList.add("d-none");
+        }
+
+        // Show spotlight controls if appropriate
+        if ($(this).val() == "spot") {
+            document.getElementById("spotlight-controls").classList.remove("d-none");
+        }
+        else
+        {
+            document.getElementById("spotlight-controls").classList.add("d-none");
+        }
+    });
+
+    // Light Controls Eventhandlers
     document.getElementById("light-x-slider").addEventListener('input', (e) => {
        document.getElementById("light-x-label").innerHTML = e.target.value;
        let temp = light_source.position;
@@ -319,6 +362,30 @@ function load()
     });
     document.getElementById("light-attenuation-check").addEventListener('change', (e) => {
         light_source.attenuate = e.target.checked;
+    });
+
+    // Spotlight Controls Eventhandlers
+    document.getElementById("spotlight-angle-slider").addEventListener('input', (e) => {
+        document.getElementById("spotlight-angle-value").innerHTML = e.target.value;
+        light_source.spotlight_falloff_angle = e.target.value;
+    });
+    document.getElementById("spotlight-target-x-slider").addEventListener('input', (e) => {
+        let temp = light_source.spotlight_target;
+        temp[0] = e.target.value;
+        light_source.spotlight_target = temp;
+        document.getElementById("spotlight-target-x-label").innerHTML = e.target.value;
+    });
+    document.getElementById("spotlight-target-y-slider").addEventListener('input', (e) => {
+        let temp = light_source.spotlight_target;
+        temp[1] = e.target.value;
+        light_source.spotlight_target = temp;
+        document.getElementById("spotlight-target-y-label").innerHTML = e.target.value;
+    });
+    document.getElementById("spotlight-target-z-slider").addEventListener('input', (e) => {
+        let temp = light_source.spotlight_target;
+        temp[2] = e.target.value;
+        light_source.spotlight_target = temp;
+        document.getElementById("spotlight-target-z-label").innerHTML = e.target.value;
     });
 }
 
@@ -391,9 +458,10 @@ function init()
             light_constantAttenuation: () => {return light_source.attenuation_constant},
             light_linearAttenuation: () => {return light_source.attenuation_linear},
             light_quadraticAttenuation: () => {return light_source.attenuation_quadratic},
-            spotlight_angle: () => {return light_source.spotlight_angle},
+            spotlight_mainlobe_angle: () => {return Math.radians(light_source.spotlight_mainlobe_angle)},
+            spotlight_falloff_angle: () => {return Math.radians(light_source.spotlight_falloff_angle)},
             spotlight_exponent: () => {return light_source.spotlight_exponent},
-            spotlight_direction: () => {return light_source.spotlight_direction},
+            spotlight_target: () => {return light_source.spotlight_target},
         },
         primitive: "triangles",
         elements: regl.prop('elements')
@@ -405,6 +473,16 @@ function init()
             color: [255, 255, 255, 255],
             depth: 1
         });
+
+        // Update the canvas size. Correct for DPI
+        width = canvas.clientWidth * window.devicePixelRatio;
+        height = canvas.clientHeight * window.devicePixelRatio;
+        if(canvas.width !== width || canvas.height !== height)
+        {
+            canvas.width = width;
+            canvas.height = height;
+            regl.poll();
+        }
 
         let frame_batch = [];
         for (const [key, value] of Object.entries(geometry.groups)) {

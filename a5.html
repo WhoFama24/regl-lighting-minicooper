@@ -26,24 +26,13 @@
                         <div class="card-body">
                             <form>
                                 <fieldset class="border p-2">
-                                    <legend class="col-form-label pt-2 w-auto">Light Position (<span id="light-x-label">0</span>, <span id="light-y-label">0</span>, <span id="light-z-label">0</span>)</legend>
-                                    <div class="slidecontainer form-check-inline">
-                                        <!-- <label class="form-check-label" for="light-x-slider">x</label> -->
-                                        <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-x-slider">
-                                    </div>
-                                    <div class="slidecontainer form-check-inline">
-                                        <!-- <label class="form-check-label" for="light-y-slider">y</label> -->
-                                        <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-y-slider">
-                                    </div>
-                                    <div class="slidecontainer form-check-inline">
-                                        <!-- <label class="form-check-label" for="light-z-slider">z</label> -->
-                                        <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-z-slider">
-                                    </div>
-                                </fieldset>
-                                <fieldset class="border p-2">
                                     <legend class="col-form-label pt-2 w-auto">Light Type</legend>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="lighting-mode" id="light-directional" value="directional" checked>
+                                        <input class="form-check-input" type="radio" name="lighting-mode" id="light-normals" value="normals" checked>
+                                        <label class="form-check-label" for="light-normals">Normal Map</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="lighting-mode" id="light-directional" value="directional">
                                         <label class="form-check-label" for="light-directional">Directional Light</label>
                                     </div>
                                     <div class="form-check">
@@ -54,11 +43,47 @@
                                         <input class="form-check-input" type="radio" name="lighting-mode" id="light-spot" value="spot">
                                         <label class="form-check-label" for="light-spot">Spot Light</label>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="lighting-mode" id="light-normals" value="normals">
-                                        <label class="form-check-label" for="light-normals">Normal Map</label>
-                                    </div>
                                 </fieldset>
+
+                                <div class="d-none" id="light-position-controls">
+                                    <fieldset class="border p-2">
+                                        <legend class="col-form-label pt-2 w-auto">Light Position (<span id="light-x-label">0</span>, <span id="light-y-label">0</span>, <span id="light-z-label">0</span>)</legend>
+                                        <div class="slidecontainer form-check-inline">
+                                            <!-- <label class="form-check-label" for="light-x-slider">x</label> -->
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-x-slider">
+                                        </div>
+                                        <div class="slidecontainer form-check-inline">
+                                            <!-- <label class="form-check-label" for="light-y-slider">y</label> -->
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-y-slider">
+                                        </div>
+                                        <div class="slidecontainer form-check-inline">
+                                            <!-- <label class="form-check-label" for="light-z-slider">z</label> -->
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="light-z-slider">
+                                        </div>
+                                    </fieldset>
+                                </div>
+
+                                <div class="d-none" id="spotlight-controls">
+                                    <fieldset class="border p-2">
+                                        <legend class="col-form-label pt-2 w-auto">Spotlight Controls</legend>
+                                        <div class="slidecontainer form-check">
+                                            <label class="form-check-label" for="spotlight-angle-slider">Mainlobe Angle: <div class="d-inline" id="spotlight-angle-value"></div></label>
+                                            <input type="range" min="0" max="10" value="1" step="0.01" class="slider" id="spotlight-angle-slider">
+                                        </div>
+                                        <div class="slidecontainer form-check">
+                                            <label class="form-check-label" for="spotlight-angle-slider">
+                                                Target Coordinates: (<span id="spotlight-target-x-label">0</span>, <span id="spotlight-target-y-label">0</span>, <span id="spotlight-target-z-label">0</span>)
+                                            </label>
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="spotlight-target-x-slider">
+                                        </div>
+                                        <div class="slidecontainer form-check">
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="spotlight-target-y-slider">
+                                        </div>
+                                        <div class="slidecontainer form-check">
+                                            <input type="range" min="-1" max="1" value="0" step="0.01" class="slider" id="spotlight-target-z-slider">
+                                        </div>
+                                    </fieldset>
+                                </div>
                                 <fieldset class="border p-2">
                                     <legend class="col-form-label pt-2 w-auto">Light Parameters</legend>
                                     <div class="form-group form-check">
